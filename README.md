@@ -9,11 +9,11 @@ Just another command line interpreter, I may work from time to time on it.
 - fork with `&` at the end of the command
 - `"` block
 - `'` block
+- expand the ~
 
-## To fix - currently happening
+## To fix / Currently happening
 
 ## TODO
-- handle the `~` in cd
 - the initial current directory is off, correct that
 - remove empty args
 - some way to manage the history

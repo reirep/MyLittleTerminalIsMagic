@@ -12,14 +12,14 @@ func internal_exit(c *Context) error {
 	return nil
 }
 
-//todo save complete path in the current dir var
 func internal_cd(c *Context, emplacement string) error {
 	var new_dir string
-	if emplacement != "" {
-		new_dir = emplacement
-	} else {
+	if emplacement == "" {
 		new_dir = get_user_dir(c)
+	} else {
+		new_dir = emplacement
 	}
+
 	if !is_root_path(new_dir) {
 		new_dir = path.Join(c.current_dir, new_dir)
 	}

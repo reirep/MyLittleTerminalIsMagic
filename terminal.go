@@ -116,11 +116,20 @@ func split_and_expand_input(c *Context, command []rune, delimiters []rune, unepa
 			current = ""
 			continue
 		}
+		//cut by word
 		if !block && letter == ' ' {
 			res = append(res, current)
 			current = ""
 			continue
 		}
+
+		//expand the ~
+		if letter == '~' && (index == 0 || command[index-1] == ' ') {
+			command = []rune(strings.Replace(string(command), "~", get_user_dir(c), 1))
+			index--
+			continue
+		}
+
 		//todo : integrate the '|' treatement here
 		if (!block || expandable) && current == "" && letter == '*' {
 			//todo: expand * and */** here
