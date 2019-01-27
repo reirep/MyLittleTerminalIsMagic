@@ -38,7 +38,7 @@ func main() {
 
 	reader := bufio.NewReader(ctx.input)
 
-	for {
+	for true {
 		fmt.Fprint(ctx.output, get_head_line(&ctx))
 		input, err := reader.ReadString('\n')
 		if err != nil {
@@ -54,7 +54,7 @@ func get_head_line(c *Context) (res string) {
 	res += "@"
 	res += get_hostname(c)
 	res += " ("
-	res += get_current_dir(c)
+	res += c.current_dir
 	res += ")\n"
 	if user == "root" {
 		res += "#"
@@ -65,12 +65,17 @@ func get_head_line(c *Context) (res string) {
 	return res
 }
 
+func parse_pipe(ctx *Context, commands string) error {
+	return nil
+}
+
 func parse_command(ctx *Context, command string) error {
+
 	input := split_and_expand_input(ctx, []rune(strings.TrimSuffix(command, "\n")), quotes, quotes_unexpandable)
 
 	//todo: chain the | here
 
-	//internal command test
+	//internal command check
 	switch input[0] {
 	case "exit":
 		return internal_exit(ctx)
@@ -94,6 +99,7 @@ func split_and_expand_input(c *Context, command []rune, delimiters []rune, unepa
 	res := make([]string, 0)
 	for index, letter := range command {
 		if contains(delimiters, letter) && (index == 0 || command[index-1] == ' ') {
+			current = ""
 			expandable = !contains(unepandables, letter)
 			//start block
 			block = true
@@ -119,13 +125,18 @@ func split_and_expand_input(c *Context, command []rune, delimiters []rune, unepa
 	if current != "" {
 		res = append(res, current)
 	}
+	//remove empty args here
 	return res
 }
 
 func exec_command(ctx *Context, input []string) error {
-	fork := input[len(input)-1] == "&"
-	if fork {
-		input = input[:len(input)-1]
+	fork := []rune(input[len(input)-1])[len([]rune(input[len(input)-1]))-1] == '&'
+	if fork { //remove the & from the last arg .... this isn't pretty
+		if input[len(input)-1] == "&" {
+			input = input[:len(input)-1]
+		} else {
+			input = append(input[:len(input)-1], string([]rune(input[len(input)-1])[:len(input[len(input)-1])-1]))
+		}
 	}
 	var cmd *exec.Cmd
 	if len(input) == 1 {

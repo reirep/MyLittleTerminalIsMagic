@@ -10,8 +10,6 @@ func internal_exit(c *Context) error {
 	return nil
 }
 
-//internal commands
-
 func internal_cd(c *Context, emplacement string) error {
 	var new_dir string
 	if emplacement != "" {
