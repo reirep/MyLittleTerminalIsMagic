@@ -2,9 +2,9 @@
 This is just another command line interpreter, I'm working from time to time on it :) . At the moment, don't expect much, this is what EA would call a finished game (= an _alpha_ ).
 To see a list of what it's currently capable of doings, look at the list bellow
 
-/!\ This terminal is currently working with the simple command but the pipes are **broken**: they will execute and pass data around but won't end.
+⚠ - This terminal is currently working with the simple command but the pipes are **broken**: they will execute and pass data around but won't end.
 
-/!\ This terminal cannot handle yet the sigint (so, no way to interrupt a command).
+⚠ - This terminal cannot handle yet the sigint (so, no way to interrupt a command).
 
 ## License
 This project is under the MIT license - license file coming soon.
