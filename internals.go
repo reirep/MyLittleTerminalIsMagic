@@ -7,12 +7,11 @@ import (
 	"path/filepath"
 )
 
-func internal_exit(c *Context) error {
+func internal_exit(c *Context) {
 	os.Exit(0)
-	return nil
 }
 
-func internal_cd(c *Context, emplacement string) error {
+func internal_cd(c *Context, emplacement string) {
 	var new_dir string
 	if emplacement == "" {
 		new_dir = get_user_dir(c)
@@ -26,14 +25,12 @@ func internal_cd(c *Context, emplacement string) error {
 
 	err := os.Chdir(new_dir)
 	if err != nil {
-		return err
+		fmt.Fprintln(c.error, err)
 	} else {
 		c.current_dir = filepath.Clean(new_dir)
-		return nil
 	}
 }
 
-func internal_pwd(c *Context) error {
+func internal_pwd(c *Context) {
 	fmt.Fprintln(c.output, c.current_dir)
-	return nil
 }

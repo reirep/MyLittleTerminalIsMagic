@@ -3,20 +3,22 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"strings"
 )
 
 var rune_pipe = '|'
+var pipe_stderr = false
 var quotes = []rune{'"', '\''}
 var quotes_unexpandable = []rune{'\''}
 
 type Context struct {
 	current_dir string
-	output      *os.File
-	input       *os.File
-	error       *os.File
+	output      io.Writer
+	input       io.Reader
+	error       io.Writer
 }
 
 func (c Context) clone() Context {
@@ -45,10 +47,7 @@ func main() {
 		if err != nil {
 			fmt.Fprintln(ctx.error, err)
 		}
-		err = parse_command(&ctx, input)
-		if err != nil {
-			fmt.Fprintln(ctx.error, err)
-		}
+		parse_pipe(&ctx, input)
 	}
 }
 
@@ -69,34 +68,56 @@ func get_head_line(c *Context) (res string) {
 	return res
 }
 
-func parse_pipe(ctx *Context, commands string) error {
-	return nil
+func parse_pipe(ctx *Context, commands string) {
+	input := split_and_expand_input(ctx, []rune(strings.TrimSuffix(commands, "\n")))
+
+	//chain the commands
+	contexts := make([]*Context, len(input))
+	for i := 0; i < len(contexts); i++ {
+		context := ctx.clone()
+		contexts[i] = &context
+	}
+	for i := 0; i < len(contexts)-1; i++ {
+		reader, writer := io.Pipe()
+		contexts[i].output = writer
+		contexts[i+1].input = reader
+	}
+
+	err := make([]error, len(input))
+	for i := 0; i < len(input); i++ {
+		if i != len(input)-1 { //wait for the last part of the pipe
+			go parse_command(contexts[i], input[i])
+		} else {
+			parse_command(contexts[i], input[i])
+		}
+	}
+	if err != nil {
+		fmt.Fprintln(ctx.error, err)
+	}
 }
 
-func parse_command(ctx *Context, command string) error {
-
-	input := split_and_expand_input(ctx, []rune(strings.TrimSuffix(command, "\n")), quotes, quotes_unexpandable)
-	fmt.Println(input)
-
-	//todo: chain the | here
-
+func parse_command(ctx *Context, command []string) {
 	//internal command check
-	switch input[0][0] {
+	switch command[0] {
 	case "exit":
-		return internal_exit(ctx)
+		internal_exit(ctx)
+		return
 	case "cd":
-		if len(input) > 1 {
-			return internal_cd(ctx, input[0][1])
+		if len(command) > 1 {
+			internal_cd(ctx, command[0])
+			return
 		} else {
-			return internal_cd(ctx, "")
+			internal_cd(ctx, "")
+			return
 		}
 	case "pwd":
-		return internal_pwd(ctx)
+		internal_pwd(ctx)
+		return
 	}
-	return exec_command(ctx, input[0])
+	exec_command(ctx, command)
 }
 
-func split_and_expand_input(c *Context, command []rune, delimiters []rune, unepandables []rune) [][]string {
+func split_and_expand_input(c *Context, command []rune) [][]string {
 	index_current := 0
 	block := false
 	expandable := false
@@ -109,9 +130,9 @@ func split_and_expand_input(c *Context, command []rune, delimiters []rune, unepa
 		letter := command[index]
 
 		//manage blocks
-		if contains(delimiters, letter) && (index == 0 || command[index-1] == ' ') {
+		if contains(quotes, letter) && (index == 0 || command[index-1] == ' ') {
 			current = ""
-			expandable = !contains(unepandables, letter)
+			expandable = !contains(quotes_unexpandable, letter)
 			//start block
 			block = true
 			delimiter = letter
@@ -170,7 +191,7 @@ func split_and_expand_input(c *Context, command []rune, delimiters []rune, unepa
 	return res
 }
 
-func exec_command(ctx *Context, input []string) error {
+func exec_command(ctx *Context, input []string) {
 	fork := []rune(input[len(input)-1])[len([]rune(input[len(input)-1]))-1] == '&'
 	if fork { //remove the & from the last arg .... this isn't pretty
 		if input[len(input)-1] == "&" {
@@ -189,10 +210,17 @@ func exec_command(ctx *Context, input []string) error {
 	cmd.Stdout = ctx.output
 	cmd.Stdin = ctx.input
 	if !fork {
-		return cmd.Run()
+		err := cmd.Run()
+		if err != nil {
+			fmt.Fprintln(ctx.error, err)
+		}
+		return
 	} else {
 		err := cmd.Start()
 		fmt.Fprintln(ctx.output, "New process started with the pid ", cmd.Process.Pid)
-		return err
+		if err != nil {
+			fmt.Fprintln(ctx.error, err)
+		}
+		return
 	}
 }

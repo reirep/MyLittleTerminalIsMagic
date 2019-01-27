@@ -14,13 +14,15 @@ Just another command line interpreter, I may work from time to time on it.
 - list all the files and the sub-files with `*/**` (except when `*/**` is in a block)
 
 ## To fix / Currently happening
+- piping with `|` (use a pipe to do that https://golang.org/pkg/io/#Pipe) -> the pipe doesn't stop gracefully, to fix
 
 ## TODO
+- redirect the stream with the > notation
+- redirect the stream themselves with &1 and &2
 - use some stringbuilder when needed
-- manage ctrl + c to cut the underlying command
+- manage ctrl + c to cut the underlying command -> https://gobyexample.com/signals
 - check that all the code handle utf8 correctly #rune
 - some way to manage the history
 - auto expand all the know command (use the history ?) use tab
-- piping with `|` (use a pipe to do that https://golang.org/pkg/io/#Pipe)
 - add support for the left arrow key and right arrow key
 - add support for the end and home key and cursor wandering around
