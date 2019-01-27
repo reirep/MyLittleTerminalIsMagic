@@ -1,14 +1,18 @@
 # My little command line is magic
 This is just another command line interpreter, I'm working from time to time on it :) . At the moment, don't expect much, this is what EA would call a finished game (= an _alpha_ ).
-This terminal is currently working with the simple command but the pipes are **broken**: they will execute and pass data around but won't end
-This terminal cannot handle yet the sigint (so, no way to interrupt a command)
 To see a list of what it's currently capable of doings, look at the list bellow
 
+/!\ This terminal is currently working with the simple command but the pipes are **broken**: they will execute and pass data around but won't end.
+
+/!\ This terminal cannot handle yet the sigint (so, no way to interrupt a command).
+
+## License
 This project is under the MIT license - license file coming soon.
 
 All contribution are welcome. By making a contribution, you're giving me the right to the contributed code (to allow this project to be easier to maintain and not having to ask everyone their comment, opinion and feelings on a single change)
 
-## Currently implemented
+## Roadmap
+### Currently implemented
 - go to a dir: `cd <dir>`
 - go to the home dir: `cd`
 - show current folder: `pwd`
@@ -20,10 +24,10 @@ All contribution are welcome. By making a contribution, you're giving me the rig
 - list of the files of the current directory with `*` (except when the `*` is in a block)
 - list all the files and the sub-files with `*/**` (except when `*/**` is in a block)
 
-## To fix / Currently happening
+### To fix / Currently happening
 - piping with `|` (use a pipe to do that https://golang.org/pkg/io/#Pipe) -> the pipe doesn't stop gracefully, to fix
 
-## TODO
+### TODO
 - redirect the stream with the > notation
 - redirect the stream themselves with &1 and &2
 - use some stringbuilder when needed
@@ -34,5 +38,5 @@ All contribution are welcome. By making a contribution, you're giving me the rig
 - add support for the left arrow key and right arrow key
 - add support for the end and home key and cursor wandering around
 
-### Misc TODO
+### TODO non code-related
 - Create a license file
