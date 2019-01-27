@@ -8,6 +8,9 @@ import (
 	"strings"
 )
 
+var quotes = []rune{'"', '\''}
+var quotes_unexpandable = []rune{'\''}
+
 type Context struct {
 	current_dir string
 	output      *os.File
@@ -63,7 +66,9 @@ func get_head_line(c *Context) (res string) {
 }
 
 func parse_command(ctx *Context, command string) error {
-	input := strings.Split(strings.TrimSuffix(command, "\n"), " ")
+	input := split_and_expand_input(ctx, []rune(strings.TrimSuffix(command, "\n")), quotes, quotes_unexpandable)
+
+	//todo: chain the | here
 
 	//internal command test
 	switch input[0] {
@@ -78,8 +83,43 @@ func parse_command(ctx *Context, command string) error {
 	case "pwd":
 		return internal_pwd(ctx)
 	}
-
 	return exec_command(ctx, input)
+}
+
+func split_and_expand_input(c *Context, command []rune, delimiters []rune, unepandables []rune) []string {
+	block := false
+	expandable := false
+	var delimiter rune
+	current := ""
+	res := make([]string, 0)
+	for index, letter := range command {
+		if contains(delimiters, letter) && (index == 0 || command[index-1] == ' ') {
+			expandable = !contains(unepandables, letter)
+			//start block
+			block = true
+			delimiter = letter
+			continue
+		}
+		if letter == delimiter && (index == len(command)-1 || command[index+1] == ' ') {
+			//end block
+			res = append(res, current)
+			current = ""
+			continue
+		}
+		if !block && letter == ' ' {
+			res = append(res, current)
+			current = ""
+			continue
+		}
+		if (!block || expandable) && letter == '*' {
+			//todo: expand * and */** here
+		}
+		current += string(letter)
+	}
+	if current != "" {
+		res = append(res, current)
+	}
+	return res
 }
 
 func exec_command(ctx *Context, input []string) error {

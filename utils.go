@@ -50,3 +50,21 @@ func get_env(c *Context) []string {
 func get_env_var(c *Context, varEnv string) string {
 	return os.Getenv(varEnv)
 }
+
+func contains(letters []rune, letter rune) bool {
+	for _, current := range letters {
+		if current == letter {
+			return true
+		}
+	}
+	return false
+}
+
+//string utils that account for the utf8 encoding
+func charAt(str string, index int) rune {
+	return []rune(str)[index]
+}
+
+func subStr(str string, start int, end int) string {
+	return string(([]rune(str))[start:end])
+}
