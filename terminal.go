@@ -44,7 +44,10 @@ func main() {
 		if err != nil {
 			fmt.Fprintln(ctx.error, err)
 		}
-		parse_command(&ctx, input)
+		err = parse_command(&ctx, input)
+		if err != nil {
+			fmt.Fprintln(ctx.error, err)
+		}
 	}
 }
 
@@ -97,7 +100,8 @@ func split_and_expand_input(c *Context, command []rune, delimiters []rune, unepa
 	var delimiter rune
 	current := ""
 	res := make([]string, 0)
-	for index, letter := range command {
+	for index := 0; index < len(command); index++ {
+		letter := command[index]
 		if contains(delimiters, letter) && (index == 0 || command[index-1] == ' ') {
 			current = ""
 			expandable = !contains(unepandables, letter)
@@ -117,8 +121,19 @@ func split_and_expand_input(c *Context, command []rune, delimiters []rune, unepa
 			current = ""
 			continue
 		}
-		if (!block || expandable) && letter == '*' {
+		//todo : integrate the '|' treatement here
+		if (!block || expandable) && current == "" && letter == '*' {
 			//todo: expand * and */** here
+			if index < len(command)-3 && string(command[index:index+4]) == "*/**" {
+				//*/** here
+				res = append(res, get_content_folder_recursive(c, c.current_dir)...)
+				index += 3
+				continue
+			} else {
+				//* here
+				res = append(res, get_content_folder(c.current_dir)...)
+				continue
+			}
 		}
 		current += string(letter)
 	}
@@ -129,6 +144,7 @@ func split_and_expand_input(c *Context, command []rune, delimiters []rune, unepa
 	return res
 }
 
+//todo manage error (404 ...)
 func exec_command(ctx *Context, input []string) error {
 	fork := []rune(input[len(input)-1])[len([]rune(input[len(input)-1]))-1] == '&'
 	if fork { //remove the & from the last arg .... this isn't pretty

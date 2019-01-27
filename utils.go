@@ -51,6 +51,23 @@ func get_env_var(c *Context, varEnv string) string {
 	return os.Getenv(varEnv)
 }
 
+func get_content_folder(foldert string) []string {
+	return []string{"lorem ipsum"} //todo
+}
+
+func get_content_folder_recursive(c *Context, folder string) []string {
+	var files []string
+	err := filepath.Walk(folder, func(path string, info os.FileInfo, err error) error {
+		files = append(files, path)
+		return nil
+	})
+	if err != nil {
+		fmt.Fprintln(c.error, err)
+		return nil
+	}
+	return files
+}
+
 func contains(letters []rune, letter rune) bool {
 	for _, current := range letters {
 		if current == letter {

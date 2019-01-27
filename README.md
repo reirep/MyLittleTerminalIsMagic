@@ -13,6 +13,7 @@ Just another command line interpreter, I may work from time to time on it.
 ## To fix - currently happening
 
 ## TODO
+- handle the `~` in cd
 - the initial current directory is off, correct that
 - remove empty args
 - some way to manage the history
