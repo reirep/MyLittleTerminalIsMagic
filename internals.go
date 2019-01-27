@@ -3,8 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"os/user"
-	"path/filepath"
 )
 
 func internal_exit(c *Context) error {
@@ -28,24 +26,4 @@ func internal_cd(c *Context, emplacement string) error {
 func internal_pwd(c *Context) error {
 	fmt.Fprintln(c.output, c.current_dir)
 	return nil
-}
-
-// utils
-
-func get_user_dir(c *Context) string {
-	usr, err := user.Current()
-	if err != nil {
-		fmt.Fprintln(c.error, err)
-		return ""
-	}
-	return usr.HomeDir
-}
-
-func get_current_dir(c *Context) string {
-	ex, err := os.Executable()
-	if err != nil {
-		fmt.Fprintln(c.error, err)
-		return ""
-	}
-	return filepath.Dir(ex)
 }
