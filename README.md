@@ -13,11 +13,12 @@ All contribution are welcome. By making a contribution, you're giving me the rig
 
 ## Roadmap
 ### Currently implemented
+- execute simple commands
 - go to a dir: `cd <dir>`
 - go to the home dir: `cd`
 - show current folder: `pwd`
 - display `#` when it is a root terminal; `$` in any other case
-- fork with `&` at the end of the command
+- fork the command if is `&` at the end of the command
 - `"` block
 - `'` block
 - expand the ~
@@ -25,7 +26,7 @@ All contribution are welcome. By making a contribution, you're giving me the rig
 - list all the files and the sub-files with `*/**` (except when `*/**` is in a block)
 
 ### To fix / Currently happening
-- piping with `|` (use a pipe to do that https://golang.org/pkg/io/#Pipe) -> the pipe doesn't stop gracefully, to fix
+- piping with `|` -> the pipe doesn't stop gracefully, to fix
 
 ### TODO
 - redirect the stream with the > notation
