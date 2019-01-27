@@ -83,16 +83,12 @@ func parse_pipe(ctx *Context, commands string) {
 		contexts[i+1].input = reader
 	}
 
-	err := make([]error, len(input))
 	for i := 0; i < len(input); i++ {
 		if i != len(input)-1 { //wait for the last part of the pipe
 			go parse_command(contexts[i], input[i])
 		} else {
 			parse_command(contexts[i], input[i])
 		}
-	}
-	if err != nil {
-		fmt.Fprintln(ctx.error, err)
 	}
 }
 
