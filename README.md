@@ -17,6 +17,7 @@ Just another command line interpreter, I may work from time to time on it.
 
 ## TODO
 - use some stringbuilder when needed
+- manage ctrl + c to cut the underlying command
 - check that all the code handle utf8 correctly #rune
 - some way to manage the history
 - auto expand all the know command (use the history ?) use tab

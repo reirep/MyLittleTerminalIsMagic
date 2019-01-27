@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+var rune_pipe = '|'
 var quotes = []rune{'"', '\''}
 var quotes_unexpandable = []rune{'\''}
 
@@ -75,33 +76,39 @@ func parse_pipe(ctx *Context, commands string) error {
 func parse_command(ctx *Context, command string) error {
 
 	input := split_and_expand_input(ctx, []rune(strings.TrimSuffix(command, "\n")), quotes, quotes_unexpandable)
+	fmt.Println(input)
 
 	//todo: chain the | here
 
 	//internal command check
-	switch input[0] {
+	switch input[0][0] {
 	case "exit":
 		return internal_exit(ctx)
 	case "cd":
 		if len(input) > 1 {
-			return internal_cd(ctx, input[1])
+			return internal_cd(ctx, input[0][1])
 		} else {
 			return internal_cd(ctx, "")
 		}
 	case "pwd":
 		return internal_pwd(ctx)
 	}
-	return exec_command(ctx, input)
+	return exec_command(ctx, input[0])
 }
 
-func split_and_expand_input(c *Context, command []rune, delimiters []rune, unepandables []rune) []string {
+func split_and_expand_input(c *Context, command []rune, delimiters []rune, unepandables []rune) [][]string {
+	index_current := 0
 	block := false
 	expandable := false
 	var delimiter rune
 	current := ""
-	res := make([]string, 0)
+	res := make([][]string, 1)
+	res[0] = make([]string, 0)
+
 	for index := 0; index < len(command); index++ {
 		letter := command[index]
+
+		//manage blocks
 		if contains(delimiters, letter) && (index == 0 || command[index-1] == ' ') {
 			current = ""
 			expandable = !contains(unepandables, letter)
@@ -112,14 +119,14 @@ func split_and_expand_input(c *Context, command []rune, delimiters []rune, unepa
 		}
 		if letter == delimiter && (index == len(command)-1 || command[index+1] == ' ') {
 			//end block
-			res = append(res, current)
+			res[index_current] = append(res[index_current], current)
 			current = ""
 			continue
 		}
 
 		//cut by word
 		if !block && letter == ' ' {
-			res = append(res, current)
+			res[index_current] = append(res[index_current], current)
 			current = ""
 			continue
 		}
@@ -131,30 +138,38 @@ func split_and_expand_input(c *Context, command []rune, delimiters []rune, unepa
 			continue
 		}
 
-		//todo : integrate the '|' treatement here
+		//manage the pipe cutting
+		if !block && letter == rune_pipe {
+			if current != "" {
+				res[index_current] = append(res[index_current], current)
+			}
+			res = append(res, make([]string, 0))
+			index_current++
+			continue
+		}
+
 		if (!block || expandable) && current == "" && letter == '*' {
-			//todo: expand * and */** here
+			//expand * and */** here
 			if index < len(command)-3 && string(command[index:index+4]) == "*/**" {
 				//*/** here
-				res = append(res, get_content_folder_recursive(c, c.current_dir)...)
+				res[index_current] = append(res[index_current], get_content_folder_recursive(c, c.current_dir)...)
 				index += 3
 				continue
 			} else {
 				//* here
-				res = append(res, get_content_folder(c.current_dir)...)
+				res[index_current] = append(res[index_current], get_content_folder(c.current_dir)...)
 				continue
 			}
 		}
 		current += string(letter)
 	}
 	if current != "" {
-		res = append(res, current)
+		res[index_current] = append(res[index_current], current)
 	}
 	res = delete_empty_elements(res)
 	return res
 }
 
-//todo manage error (404 ...)
 func exec_command(ctx *Context, input []string) error {
 	fork := []rune(input[len(input)-1])[len([]rune(input[len(input)-1]))-1] == '&'
 	if fork { //remove the & from the last arg .... this isn't pretty

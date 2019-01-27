@@ -77,7 +77,19 @@ func contains(letters []rune, letter rune) bool {
 	return false
 }
 
-func delete_empty_elements(in []string) []string {
+func delete_empty_elements(in [][]string) [][]string {
+	for i := 0; i < len(in); i++ {
+		if len(in[i]) == 0 {
+			in = append(in[:i], in[i+1:]...)
+			i--
+			continue
+		}
+		in[i] = delete_empty_elements_simple(in[i])
+	}
+	return in
+}
+
+func delete_empty_elements_simple(in []string) []string {
 	for i := 0; i < len(in); i++ {
 		if in[i] == "" {
 			in = append(in[:i], in[i+1:]...)
