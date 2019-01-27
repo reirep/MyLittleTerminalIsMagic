@@ -124,7 +124,7 @@ func split_and_expand_input(c *Context, command []rune, delimiters []rune, unepa
 		}
 
 		//expand the ~
-		if letter == '~' && (index == 0 || command[index-1] == ' ') {
+		if !block && letter == '~' && (index == 0 || command[index-1] == ' ') {
 			command = []rune(strings.Replace(string(command), "~", get_user_dir(c), 1))
 			index--
 			continue
