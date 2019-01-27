@@ -116,6 +116,7 @@ func split_and_expand_input(c *Context, command []rune, delimiters []rune, unepa
 			current = ""
 			continue
 		}
+
 		//cut by word
 		if !block && letter == ' ' {
 			res = append(res, current)
@@ -149,7 +150,7 @@ func split_and_expand_input(c *Context, command []rune, delimiters []rune, unepa
 	if current != "" {
 		res = append(res, current)
 	}
-	//remove empty args here
+	res = delete_empty_elements(res)
 	return res
 }
 

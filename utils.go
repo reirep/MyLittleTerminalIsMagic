@@ -77,6 +77,16 @@ func contains(letters []rune, letter rune) bool {
 	return false
 }
 
+func delete_empty_elements(in []string) []string {
+	for i := 0; i < len(in); i++ {
+		if in[i] == "" {
+			in = append(in[:i], in[i+1:]...)
+			i--
+		}
+	}
+	return in
+}
+
 //string utils that account for the utf8 encoding
 func charAt(str string, index int) rune {
 	return []rune(str)[index]

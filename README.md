@@ -10,16 +10,14 @@ Just another command line interpreter, I may work from time to time on it.
 - `"` block
 - `'` block
 - expand the ~
+- list of the files of the current dir with `*` (except when the `*` is in a block)
+- list all the files and the subfiles with `*/**` (except when `*/**` is in a block)
 
 ## To fix / Currently happening
 
 ## TODO
-- the initial current directory is off, correct that
-- remove empty args
 - some way to manage the history
 - auto expand all the know command (use the history ?) use tab
 - piping with `|` (use a pipe to do that https://golang.org/pkg/io/#Pipe)
-- list of the files of the current dir with `*` (except when the `*` is in the `'` block)
-- list all the files and the subfiles with `*/**`
 - add support for the left arrow key and right arrow key
-- add support for the end and home key
+- add support for the end and home key and cursor wandeling arround
