@@ -1,4 +1,4 @@
-# My little command line is magic
+# My little terminal is magic
 This is just another command line interpreter, I'm working from time to time on it :) . At the moment, don't expect much, this is what EA would call a finished game (= an _alpha_ ).
 To see a list of what it's currently capable of doings, look at the list bellow
 
