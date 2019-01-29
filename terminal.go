@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"os/exec"
 	"strings"
 )
 
@@ -41,7 +40,7 @@ func main() {
 
 	reader := bufio.NewReader(ctx.input)
 
-	for true {
+	for {
 		fmt.Fprint(ctx.output, get_head_line(&ctx))
 		input, err := reader.ReadString('\n')
 		if err != nil {
@@ -113,6 +112,21 @@ func parse_command(ctx *Context, command []string) {
 	exec_command(ctx, command)
 }
 
+func exec_command(ctx *Context, input []string) command {
+	sync := is_command_sync(input)
+	if !sync { //remove the & if needed
+		input = remove_last_letter_command(input)
+	}
+	input = delete_empty_elements_array_string(input)
+
+	command := new_command(sync, input[0], input[1:], ctx)
+	err := command.start()
+	if err != nil {
+		fmt.Fprintln(ctx.error, err)
+	}
+	return command
+}
+
 func split_and_expand_input(c *Context, command []rune) [][]string {
 	index_current := 0
 	block := false
@@ -151,7 +165,7 @@ func split_and_expand_input(c *Context, command []rune) [][]string {
 		//expand the ~
 		if !block && letter == '~' && (index == 0 || command[index-1] == ' ') {
 			command = []rune(strings.Replace(string(command), "~", get_user_dir(c), 1))
-			index--
+			index-- //could do += len(get_user_Dir(c)) -1
 			continue
 		}
 
@@ -183,40 +197,6 @@ func split_and_expand_input(c *Context, command []rune) [][]string {
 	if current != "" {
 		res[index_current] = append(res[index_current], current)
 	}
-	res = delete_empty_elements(res)
+	res = delete_empty_elements_array_array(res)
 	return res
-}
-
-func exec_command(ctx *Context, input []string) {
-	fork := []rune(input[len(input)-1])[len([]rune(input[len(input)-1]))-1] == '&'
-	if fork { //remove the & from the last arg .... this isn't pretty
-		if input[len(input)-1] == "&" {
-			input = input[:len(input)-1]
-		} else {
-			input = append(input[:len(input)-1], string([]rune(input[len(input)-1])[:len(input[len(input)-1])-1]))
-		}
-	}
-	var cmd *exec.Cmd
-	if len(input) == 1 {
-		cmd = exec.Command(input[0], make([]string, 0)...)
-	} else {
-		cmd = exec.Command(input[0], input[1:]...)
-	}
-	cmd.Stderr = ctx.error
-	cmd.Stdout = ctx.output
-	cmd.Stdin = ctx.input
-	if !fork {
-		err := cmd.Run()
-		if err != nil {
-			fmt.Fprintln(ctx.error, err)
-		}
-		return
-	} else {
-		err := cmd.Start()
-		fmt.Fprintln(ctx.output, "New process started with the pid ", cmd.Process.Pid)
-		if err != nil {
-			fmt.Fprintln(ctx.error, err)
-		}
-		return
-	}
 }
