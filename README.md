@@ -1,6 +1,6 @@
 # My little terminal is magic
 This is just another command line interpreter, I'm working from time to time on it :) . At the moment, don't expect much, this is what EA would call a finished game (= an _alpha_ ).
-To see a list of what it's currently capable of doing, look at the list bellow
+To see a list of what it's currently capable of doing, look at the list below
 
 ⚠ - This terminal is currently working with the simple command but the pipes are **broken**: they will execute and pass data around but won't end.
 
